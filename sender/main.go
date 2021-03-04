@@ -22,16 +22,21 @@ func main() {
 
 	host := os.Getenv("MONITOR_HOST")
 	token := os.Getenv("MONITOR_TOKEN")
+	clientName := os.Getenv("MONITOR_CLIENT")
 	if token == "" || host == "" {
 		fmt.Println("Please set MONITOR_HOST and MONITOR_TOKEN in environment.")
 		return
+	}
+
+	if clientName == "" {
+		clientName = utils.GetHostName()
 	}
 
 	content := strings.Join(utils.GetIPAddressList(), "\n")
 
 	params := url.Values{}
 	params.Add("token", token)
-	params.Add("key", fmt.Sprintf("ipinfo-%s", utils.GetHostName()))
+	params.Add("key", fmt.Sprintf("ipinfo-%s", clientName))
 	params.Add("value", content)
 
 	apiUrl := fmt.Sprintf("%s/api/status", host)
