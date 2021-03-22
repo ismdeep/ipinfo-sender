@@ -1,32 +1,45 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/ismdeep/ipinfo-sender/sender/utils"
+	"github.com/ismdeep/ismdeep-go-utils/args_util"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
+	"time"
 )
 
-func main() {
-	if len(os.Args) > 1 && os.Args[1] == "--version" {
-		ShowVersionInfo()
-		return
+type Config struct {
+	Host      string `json:"host"`
+	Token     string `json:"token"`
+	Client    string `json:"client"`
+	Endless   bool   `json:"endless"`
+	SleepTime int64  `json:"sleep_time"`
+}
+
+func LoadConfig(path string) (*Config, error) {
+	config := &Config{}
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
 	}
 
-	if len(os.Args) > 1 && os.Args[1] == "--help" {
-		ShowHelpMsg()
-		return
+	err = json.Unmarshal(data, config)
+	if err != nil {
+		return nil, err
 	}
 
-	host := os.Getenv("MONITOR_HOST")
-	token := os.Getenv("MONITOR_TOKEN")
-	clientName := os.Getenv("MONITOR_CLIENT")
-	if token == "" || host == "" {
-		fmt.Println("Please set MONITOR_HOST and MONITOR_TOKEN in environment.")
-		return
-	}
+	return config, nil
+}
+
+func SendIpInfo(config *Config) {
+	log.Println(config)
+
+	clientName := config.Client
 
 	if clientName == "" {
 		clientName = utils.GetHostName()
@@ -35,11 +48,43 @@ func main() {
 	content := strings.Join(utils.GetIPAddressList(), "\n")
 
 	params := url.Values{}
-	params.Add("token", token)
+	params.Add("token", config.Token)
 	params.Add("key", fmt.Sprintf("ipinfo-%s", clientName))
 	params.Add("value", content)
 
-	apiUrl := fmt.Sprintf("%s/api/status", host)
+	apiUrl := fmt.Sprintf("%s/api/status", config.Host)
 
 	_, _ = http.PostForm(apiUrl, params)
+}
+
+func main() {
+	if args_util.Exists("--version") {
+		ShowVersionInfo()
+		return
+	}
+
+	if args_util.Exists("--help") {
+		ShowHelpMsg()
+		return
+	}
+
+	if !args_util.Exists("-c") {
+		ShowHelpMsg()
+		return
+	}
+
+	config, err := LoadConfig(args_util.GetValue("-c"))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if config.Endless {
+		for {
+			SendIpInfo(config)
+			time.Sleep(time.Duration(config.SleepTime) * time.Second)
+		}
+	} else {
+		SendIpInfo(config)
+	}
 }

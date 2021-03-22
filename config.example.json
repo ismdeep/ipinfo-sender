@@ -1,0 +1,7 @@
+{
+  "host": "https://monitor.ismdeep.com",
+  "token": "",
+  "client": "",
+  "endless": false,
+  "sleep_time": 300
+}
