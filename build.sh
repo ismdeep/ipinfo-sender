@@ -3,7 +3,10 @@
 function build() {
     target_os=$1
     target_arch=$2
-    GOOS=${target_os} GOARCH=${target_arch} go build -o bin/ipinfo-sender-${target_os}-${target_arch} github.com/ismdeep/ipinfo-sender/sender
+    GOOS=${target_os} GOARCH=${target_arch} \
+        go build \
+        -o bin/ipinfo-sender-${target_os}-${target_arch} \
+        github.com/ismdeep/ipinfo-sender/sender
     echo BUILD PASS ${target_os} ${target_arch}
 }
 

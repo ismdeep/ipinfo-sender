@@ -5,13 +5,19 @@ import (
 	"fmt"
 	"github.com/ismdeep/ipinfo-sender/sender/utils"
 	"github.com/ismdeep/ismdeep-go-utils/args_util"
+	"go.uber.org/zap"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 )
+
+var logger *zap.Logger
+
+func init() {
+	logger = zap.NewExample()
+}
 
 type Config struct {
 	Host      string `json:"host"`
@@ -37,7 +43,7 @@ func LoadConfig(path string) (*Config, error) {
 }
 
 func SendIpInfo(config *Config) {
-	log.Println(config)
+	logger.Debug("SendIpInfo()", zap.Any("config", config))
 
 	clientName := config.Client
 
@@ -54,7 +60,11 @@ func SendIpInfo(config *Config) {
 
 	apiUrl := fmt.Sprintf("%s/api/status", config.Host)
 
-	_, _ = http.PostForm(apiUrl, params)
+	_, err := http.PostForm(apiUrl, params)
+	if err != nil {
+		logger.Error("发送失败", zap.Any("err", err))
+	}
+	logger.Info("发送成功", zap.Any("params", params))
 }
 
 func main() {
