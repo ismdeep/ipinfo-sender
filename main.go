@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ismdeep/ipinfo-sender/sender/utils"
+	"github.com/ismdeep/ipinfo-sender/utils"
 	"github.com/ismdeep/ismdeep-go-utils/args_util"
 	"go.uber.org/zap"
 	"io/ioutil"
