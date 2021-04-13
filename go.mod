@@ -3,6 +3,6 @@ module github.com/ismdeep/ipinfo-sender
 go 1.15
 
 require (
-	github.com/ismdeep/ismdeep-go-utils v0.0.2
-	go.uber.org/zap v1.16.0
+	github.com/ismdeep/args v0.0.1
+	github.com/ismdeep/log v0.0.3
 )
